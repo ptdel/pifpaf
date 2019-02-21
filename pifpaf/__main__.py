@@ -234,7 +234,7 @@ class RunGroup(click.MultiCommand):
                 })
                 for k, v in six.iteritems(driver.env):
                     os.environ[k] = str(v)
-                    print("export %s=\"%s\"" % (k, v))
+                    print(os.environ.get(k, 'not_set'))
                 print("%(prefix_lower)s_stop () { "
                       "if test -z \"$%(prefix)s_PID\"; then "
                       "echo 'No PID found in $%(prefix)s_PID'; return -1; "
