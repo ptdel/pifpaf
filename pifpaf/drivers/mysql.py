@@ -14,7 +14,6 @@ import os
 
 from pifpaf import drivers
 
-
 class MySQLDriver(drivers.Driver):
     def _setUp(self):
         super(MySQLDriver, self)._setUp()
@@ -25,6 +24,7 @@ class MySQLDriver(drivers.Driver):
         os.mkdir(tempdir)
         c, _ = self._exec(["mysqld",
                            "--no-defaults",
+                           "--basedir=/usr",
                            "--tmpdir=" + tempdir,
                            "--initialize-insecure",
                            "--datadir=" + datadir],
@@ -34,10 +34,12 @@ class MySQLDriver(drivers.Driver):
             # Use the old deprecated way
             c, _ = self._exec(["mysql_install_db",
                                "--no-defaults",
+                               "--basedir=/usr",
                                "--tmpdir=" + tempdir,
                                "--datadir=" + datadir])
         c, _ = self._exec(["mysqld",
                            "--no-defaults",
+                           "--basedir=/usr",
                            "--tmpdir=" + tempdir,
                            "--datadir=" + datadir,
                            "--socket=" + self.socket,
@@ -50,5 +52,5 @@ class MySQLDriver(drivers.Driver):
                     "-S", self.socket,
                     "-e", "CREATE DATABASE pifpaf;"])
         self.putenv("MYSQL_SOCKET", self.socket)
-        self.url = "mysql://root@localhost/pifpaf?unix_socket=" + self.socket
+        self.url = "mysql+mysqlconnector://root@localhost/pifpaf?unix_socket=" + self.socket
         self.putenv("URL", self.url)
