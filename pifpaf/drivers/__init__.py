@@ -13,7 +13,6 @@
 
 import contextlib
 import errno
-import logging
 import os
 import re
 import select
@@ -45,8 +44,6 @@ else:
             return s
         return s.decode(sys.getfilesystemencoding())
 
-
-LOG = logging.getLogger(__name__)
 
 if six.PY2:
     # This is defined only on Python 3
@@ -128,16 +125,12 @@ class Driver(fixtures.Fixture):
             procs.add(parent)
             parent.terminate()
         except psutil.NoSuchProcess:
-            LOG.warning("`%s` is already gone, sending SIGKILL to its process "
-                        "group", parent)
             do_sigkill = True
         else:
             # Waiting for all processes to stop
             gone, alive = psutil.wait_procs(procs, timeout=10)
             if alive:
                 do_sigkill = True
-                LOG.warning("`%s` didn't terminate cleanly after 10 seconds, "
-                            "sending SIGKILL to its process group", parent)
 
         if do_sigkill and procs:
             for p in procs:
@@ -147,14 +140,14 @@ class Driver(fixtures.Fixture):
                     pass
             gone, alive = psutil.wait_procs(procs, timeout=10)
             if alive:
-                LOG.warning("`%s` survive SIGKILL", alive)
-
+                pass
+            
         if log_thread:
             # Parent process have been killed
             log_thread.join(timeout=3)
             if log_thread.is_alive():
-                LOG.warning("logging thread for `%s` is still alive", parent)
-
+                pass
+            
     @staticmethod
     def find_executable(filename, extra_paths):
         paths = extra_paths + os.getenv('PATH', os.defpath).split(os.pathsep)
@@ -189,18 +182,16 @@ class Driver(fixtures.Fixture):
     @staticmethod
     def _log_output(appname, pid, data):
         data = fsdecode(data)
-        LOG.debug("%s[%d] output: %s", appname, pid, data.rstrip())
 
     def _exec(self, command, stdout=False, ignore_failure=False,
               stdin=None, wait_for_line=None, wait_for_port=None,
               path=[], env=None,
               forbidden_line_after_start=None,
               allow_debug=True):
-        LOG.debug("executing: %s", command)
 
         app = command[0]
 
-        debug = allow_debug and LOG.isEnabledFor(logging.DEBUG)
+        debug = allow_debug
 
         if stdout or wait_for_line or debug:
             stdout_fd = subprocess.PIPE
@@ -242,7 +233,6 @@ class Driver(fixtures.Fixture):
         self.addCleanup(self._kill, c)
 
         if stdin:
-            LOG.debug("%s input: %s", app, stdin)
             c.stdin.write(stdin)
             c.stdin.close()
 
