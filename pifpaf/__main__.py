@@ -233,7 +233,7 @@ class RunGroup(click.MultiCommand):
                     "(pifpaf/" + daemon + ") " + os.getenv("PS1", ""),
                 })
                 for k, v in six.iteritems(driver.env):
-                    os.environ[k] = v
+                    os.environ[k] = str(v)
                     print("export %s=\"%s\"" % (k, v))
                 print("%(prefix_lower)s_stop () { "
                       "if test -z \"$%(prefix)s_PID\"; then "
